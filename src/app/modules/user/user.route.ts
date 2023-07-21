@@ -9,5 +9,6 @@ router.post(
   validateZodRequest(userValidation.userZodSchema),
   userController.createNewUser
 )
+router.get('/', userController.getAllUsers)
 
 export const userRoutes = { router }
