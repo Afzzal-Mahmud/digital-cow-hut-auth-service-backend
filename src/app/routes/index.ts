@@ -8,6 +8,10 @@ const moduleRoute = [
     path: '/auth/',
     route: userRoutes.router,
   },
+  {
+    path: '/users/',
+    route: userRoutes.router,
+  },
 ]
 
 moduleRoute.forEach(eachRoute => routers.use(eachRoute.path, eachRoute.route))
