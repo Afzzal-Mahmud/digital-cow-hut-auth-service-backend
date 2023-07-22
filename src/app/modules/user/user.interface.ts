@@ -24,3 +24,10 @@ export type IUser = {
   income: string
   profileImage?: string
 }
+
+/* student filtearable field interface on service*/
+export type IUserFilters = {
+  searchTerm?: string
+  id?: string
+  phoneNumber?: string
+}

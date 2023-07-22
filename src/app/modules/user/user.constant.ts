@@ -66,3 +66,12 @@ export const locations = [
   'Tangail',
   'Thakurgaon',
 ]
+
+export const userFiltarableFields = ['searchTerm', 'id', 'phoneNumber']
+
+export const userSearchableFields = [
+  'name.firstName',
+  'name.lastName',
+  'role',
+  'address',
+]
