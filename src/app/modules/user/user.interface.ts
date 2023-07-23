@@ -28,6 +28,6 @@ export type IUser = {
 /* student filtearable field interface on service*/
 export type IUserFilters = {
   searchTerm?: string
-  id?: string
+  _id?: string
   phoneNumber?: string
 }
