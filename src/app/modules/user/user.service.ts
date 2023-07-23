@@ -1,9 +1,11 @@
+import { SortOrder } from 'mongoose'
 import ApiErrors from '../../../errors/ApiErrors'
 import { IGenericResponseOnGet } from '../../../interfaces/IGenericResponseOnGet'
 import { IPaginationObject } from '../../../interfaces/IPaginationOptions'
 import { paginationHelper } from '../../../shared/utility/calculatePagination.helper'
-import { IUser } from './user.interface'
+import { IUser, IUserFilters } from './user.interface'
 import { User } from './user.model'
+import { userSearchableFields } from './user.constant'
 
 const createUser = async (payload: IUser): Promise<IUser> => {
   if (payload.role === 'buyer' && parseInt(payload.budget) < 10000) {
@@ -17,12 +19,47 @@ const createUser = async (payload: IUser): Promise<IUser> => {
 }
 
 const getEveryUsers = async (
+  filters: IUserFilters,
   paginationObject: IPaginationObject
 ): Promise<IGenericResponseOnGet<IUser[]>> => {
-  const { page, limit, skipDoc } =
+  const { searchTerm, ...filtersData } = filters
+  const { page, limit, skipDoc, sortBy, sortOrder } =
     paginationHelper.calculatePagination(paginationObject)
+
+  const andConditions = []
+  // Search needs $or for searching in specified fields for any match
+  if (searchTerm) {
+    andConditions.push({
+      $or: userSearchableFields.map(field => ({
+        [field]: {
+          $regex: searchTerm,
+          $options: 'i',
+        },
+      })),
+    })
+  }
+  // Filters needs $and to filter exact data match
+  if (Object.keys(filtersData).length) {
+    andConditions.push({
+      $and: Object.entries(filtersData).map(([field, value]) => ({
+        [field]: value,
+      })),
+    })
+  }
+
+  // Dynamic Sort needs  field to  do sorting
+  const sortConditions: { [key: string]: SortOrder } = {}
+  if (sortBy && sortOrder) {
+    sortConditions[sortBy] = sortOrder
+  }
+  const dataRetrieveCondition =
+    andConditions.length > 0 ? { $and: andConditions } : {}
+
   const total = await User.countDocuments()
-  const result = await User.find().skip(skipDoc).limit(limit)
+  const result = await User.find(dataRetrieveCondition)
+    .sort(sortConditions)
+    .skip(skipDoc)
+    .limit(limit)
 
   return {
     meta: { page, limit, total },

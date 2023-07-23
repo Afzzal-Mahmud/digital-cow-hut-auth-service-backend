@@ -5,6 +5,7 @@ import { IUser } from './user.interface'
 import { userServices } from './user.service'
 import { paginationKeyArray } from '../../../shared/constant/paginationKeyArray'
 import { createObject } from '../../../shared/utility/createObject'
+import { userFiltarableFields } from './user.constant'
 
 const createNewUser = catchAsync(async (req: Request, res: Response) => {
   const { ...userData } = req.body
@@ -19,8 +20,9 @@ const createNewUser = catchAsync(async (req: Request, res: Response) => {
 })
 
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+  const filters = await createObject(req.query, userFiltarableFields)
   const paginationObject = createObject(req.query, paginationKeyArray)
-  const result = await userServices.getEveryUsers(paginationObject)
+  const result = await userServices.getEveryUsers(filters, paginationObject)
 
   sendResponse<IUser[]>(res, {
     statusCode: 200,
