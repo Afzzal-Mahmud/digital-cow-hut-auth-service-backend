@@ -10,5 +10,12 @@ router.post(
   userController.createNewUser
 )
 router.get('/', userController.getAllUsers)
+router.get('/:id', userController.getSingleUser)
+router.patch(
+  '/:id',
+  validateZodRequest(userValidation.userZodSchemaOnUpdate),
+  userController.updateUser
+)
+router.delete('/:id', userController.deleteUser)
 
 export const userRoutes = { router }
