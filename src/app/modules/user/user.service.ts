@@ -3,7 +3,7 @@ import ApiErrors from '../../../errors/ApiErrors'
 import { IGenericResponseOnGet } from '../../../interfaces/IGenericResponseOnGet'
 import { IPaginationObject } from '../../../interfaces/IPaginationOptions'
 import { paginationHelper } from '../../../shared/utility/calculatePagination.helper'
-import { IUser, IUserFilters } from './user.interface'
+import { IUser, IUserFilters, UserName } from './user.interface'
 import { User } from './user.model'
 import { userSearchableFields } from './user.constant'
 
@@ -67,7 +67,47 @@ const getEveryUsers = async (
   }
 }
 
+const retriveSingleUser = async (id: string): Promise<IUser | null> => {
+  const result = await User.findById(id)
+  return result
+}
+
+const updateUserInfo = async (
+  _id: string,
+  payload: Partial<IUser>
+): Promise<IUser | null> => {
+  const isUserExist = await User.findOne({ _id })
+  if (!isUserExist) {
+    throw new ApiErrors(404, 'User not found')
+  }
+
+  const { name, ...userData } = payload
+
+  if (payload.name) {
+    for (const key in name) {
+      if (Object.prototype.hasOwnProperty.call(name, key)) {
+        isUserExist.name[key as keyof UserName] = name[key as keyof UserName]
+      }
+    }
+  }
+
+  Object.assign(isUserExist, userData)
+
+  const result = await User.findOneAndUpdate({ _id }, payload, {
+    new: true,
+  })
+  return result
+}
+
+const deleteUser = async (_id: string): Promise<IUser | null> => {
+  const result = await User.findByIdAndDelete(_id)
+  return result
+}
+
 export const userServices = {
   createUser,
   getEveryUsers,
+  retriveSingleUser,
+  updateUserInfo,
+  deleteUser,
 }
