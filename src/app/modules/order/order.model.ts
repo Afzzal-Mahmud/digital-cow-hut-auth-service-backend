@@ -17,26 +17,34 @@ type OrderModel = Model<IOrder, Record<string, unknown>>
 export const Order = model<IOrder, OrderModel>('Order', OrderSchema)
 
 /* seving transection details to the server*/
-const TransectionHistorySchema = new Schema<ITransectionHistory>({
-  buyerOriginalBudget: Number,
-  buyerBudgetAfterPurches: Number,
-  sellersIncome: Number,
-  buyerInfo: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
+const TransectionHistorySchema = new Schema<ITransectionHistory>(
+  {
+    buyerOriginalBudget: Number,
+    buyerBudgetAfterPurches: Number,
+    sellersIncome: Number,
+    buyerInfo: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    sellerInfo: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    cowInfo: {
+      type: Schema.Types.ObjectId,
+      ref: 'Cow',
+      required: true,
+    },
   },
-  sellerInfo: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-  cowInfo: {
-    type: Schema.Types.ObjectId,
-    ref: 'Cow',
-    required: true,
-  },
-})
+  {
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+    },
+  }
+)
 
 type TransectionHistoryModel = Model<
   ITransectionHistory,
