@@ -5,6 +5,10 @@ import { User } from '../user/user.model'
 import { IOrder, ITransectionHistory } from './order.interface'
 import ApiErrors from '../../../errors/ApiErrors'
 import { Transections } from './order.model'
+import { IGenericResponseOnGet } from '../../../interfaces/IGenericResponseOnGet'
+import { IPaginationObject } from '../../../interfaces/IPaginationOptions'
+import { paginationHelper } from '../../../shared/utility/calculatePagination.helper'
+import { SortOrder } from 'mongoose'
 
 const placedOrder = async (
   orderHistory: IOrder
@@ -89,6 +93,33 @@ const placedOrder = async (
   return null
 }
 
+const getEveryOrders = async (
+  paginationObject: IPaginationObject
+): Promise<IGenericResponseOnGet<ITransectionHistory[]>> => {
+  const { page, limit, skipDoc, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(paginationObject)
+
+  const sortConditions: { [key: string]: SortOrder } = {}
+  if (sortBy && sortOrder) {
+    sortConditions[sortBy] = sortOrder
+  }
+
+  const total = await Transections.countDocuments()
+  const result = await Transections.find()
+    .populate('buyerInfo')
+    .populate('sellerInfo')
+    .populate('cowInfo')
+    .sort(sortConditions)
+    .skip(skipDoc)
+    .limit(limit)
+
+  return {
+    meta: { page, limit, total },
+    data: result,
+  }
+}
+
 export const orderServices = {
   placedOrder,
+  getEveryOrders,
 }
